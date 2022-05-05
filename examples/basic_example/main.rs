@@ -17,6 +17,7 @@ fn main() {
         println!("Error: {:?}", submission_result);
     };
 
+    // Release K
     let desired_key_state = KeyState::Released;
     println!("Release {}", keycode);
     let submission_result = vk_service.send_key(keycode, desired_key_state);
