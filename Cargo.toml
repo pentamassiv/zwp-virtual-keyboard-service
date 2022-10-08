@@ -6,24 +6,32 @@ license = "MIT"
 description = "Safe wrapper to easily use the zwp-virtual-keyboard protocol"
 repository = "https://github.com/pentamassiv/zwp-virtual-keyboard-service"
 documentation = "https://docs.rs/zwp-virtual-keyboard-service"
-keywords = ["wayland", "virtual_keyboard", "wayland-scanner", "unstable", "wayland-protocols"]
+keywords = [
+    "wayland",
+    "virtual_keyboard",
+    "wayland-scanner",
+    "unstable",
+    "wayland-protocols",
+]
 categories = ["gui", "os::linux-apis"]
 edition = "2021"
 
 [dependencies]
-wayland-client = {version="0.29", features = ["use_system_lib"]}
-wayland-protocols = {version="0.29", features = ["client", "unstable_protocols"]}
+wayland-client = { version = "0.30.0-beta.10" }
+wayland-protocols = { version = "0.30.0-beta.10", features = [
+    "client",
+    "unstable",
+] }
+wayland-protocols-misc = { version = "0.1.0-beta.10", features = ["client"] }
 input-event-codes = "5.16.8"
-zwp-virtual-keyboard = "0.2.6"
 log = { version = "0.4", optional = true }
 libc = "0.2.125"
-bitflags = {version = "1.2"}
+bitflags = { version = "1.2" }
 tempfile = "3.2"
 memmap2 = "0.5"
 
 [dev-dependencies]
 gtk = "0.15.5"
-
 
 
 [features]

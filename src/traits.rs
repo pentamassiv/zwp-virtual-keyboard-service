@@ -1,7 +1,8 @@
 use super::SubmitError;
-use wayland_client::{protocol::wl_seat::WlSeat, EventQueue, Main};
+use wayland_client::{protocol::wl_seat::WlSeat, Dispatch, EventQueue};
 
-use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_manager_v1::ZwpVirtualKeyboardManagerV1;
+use wayland_protocols_misc::zwp_virtual_keyboard_v1::client::zwp_virtual_keyboard_manager_v1::ZwpVirtualKeyboardManagerV1;
+use wayland_protocols_misc::zwp_virtual_keyboard_v1::client::zwp_virtual_keyboard_v1::ZwpVirtualKeyboardV1;
 
 use super::{KeyCode, KeyState};
 
@@ -9,9 +10,9 @@ use super::{KeyCode, KeyState};
 /// This helps write test cases, because they can be generic
 pub trait VirtualKeyboard {
     fn new(
-        event_queue: EventQueue,
+        event_queue: EventQueue<dyn Dispatch<ZwpVirtualKeyboardV1>>,
         seat: &WlSeat,
-        vk_manager: Main<ZwpVirtualKeyboardManagerV1>,
+        vk_manager: ZwpVirtualKeyboardManagerV1,
     ) -> Self;
 
     fn send_key(&self, keycode: KeyCode, desired_key_state: KeyState) -> Result<(), SubmitError>;

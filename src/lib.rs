@@ -6,8 +6,10 @@
 extern crate log;
 
 use std::sync::{Arc, Mutex};
-use wayland_client::{protocol::wl_seat::WlSeat, EventQueue, Main};
-use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_manager_v1::ZwpVirtualKeyboardManagerV1;
+use wayland_client::Dispatch;
+use wayland_client::{protocol::wl_seat::WlSeat, EventQueue};
+use wayland_protocols_misc::zwp_virtual_keyboard_v1::client::zwp_virtual_keyboard_manager_v1::ZwpVirtualKeyboardManagerV1;
+use wayland_protocols_misc::zwp_virtual_keyboard_v1::client::zwp_virtual_keyboard_v1::ZwpVirtualKeyboardV1;
 
 mod keymap;
 
@@ -40,9 +42,9 @@ pub struct VKService {
 
 impl VirtualKeyboard for VKService {
     fn new(
-        event_queue: EventQueue,
+        event_queue: EventQueue<dyn Dispatch<ZwpVirtualKeyboardV1>>,
         seat: &WlSeat,
-        vk_manager: Main<ZwpVirtualKeyboardManagerV1>,
+        vk_manager: ZwpVirtualKeyboardManagerV1,
     ) -> Self {
         let vk_service_arc = VKServiceArc::new(event_queue, seat, vk_manager);
         Self { vk_service_arc }

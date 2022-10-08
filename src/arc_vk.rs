@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
-use wayland_client::{protocol::wl_seat::WlSeat, EventQueue, Main};
+use wayland_client::Dispatch;
+use wayland_client::{protocol::wl_seat::WlSeat, EventQueue};
 
 use std::convert::AsRef;
 use std::convert::TryInto;
@@ -7,8 +8,9 @@ use std::io::{Seek, SeekFrom, Write};
 use std::os::unix::io::IntoRawFd;
 use std::time::Instant;
 use tempfile::tempfile;
-use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_manager_v1::ZwpVirtualKeyboardManagerV1;
-use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_v1::ZwpVirtualKeyboardV1;
+use wayland_client::Proxy;
+use wayland_protocols_misc::zwp_virtual_keyboard_v1::client::zwp_virtual_keyboard_manager_v1::ZwpVirtualKeyboardManagerV1;
+use wayland_protocols_misc::zwp_virtual_keyboard_v1::client::zwp_virtual_keyboard_v1::ZwpVirtualKeyboardV1;
 
 use super::{KeyCode, KeyState, SubmitError};
 
@@ -31,24 +33,24 @@ impl Default for VKModifierState {
 /// wraps IMServiceArc and returns Arc<Mutex<IMServiceArc<T>>>. This is required because it's state could get changed by multiple threads.
 /// One thread could handle requests while the other one handles events from the wayland-server
 pub struct VKServiceArc {
-    vk: Main<ZwpVirtualKeyboardV1>,
+    vk: ZwpVirtualKeyboardV1,
     modifiers: VKModifierState,
-    event_queue: EventQueue, // Preventing event_queue from being dropped
+    event_queue: EventQueue<dyn Dispatch<ZwpVirtualKeyboardV1>>, // Preventing event_queue from being dropped
     base_time: std::time::Instant,
 }
 
 impl VKServiceArc {
     /// Creates a new IMServiceArc wrapped in Arc<Mutex<Self>>
     pub fn new(
-        event_queue: EventQueue,
+        event_queue: EventQueue<dyn Dispatch<ZwpVirtualKeyboardV1>>,
         seat: &WlSeat,
-        vk_manager: Main<ZwpVirtualKeyboardManagerV1>,
+        vk_manager: ZwpVirtualKeyboardManagerV1,
     ) -> Arc<Mutex<VKServiceArc>> {
         let base_time = Instant::now();
         let modifiers = VKModifierState::default();
 
         // Get ZwpInputMethodV2 from ZwpInputMethodManagerV2
-        let vk = vk_manager.create_virtual_keyboard(&seat);
+        let vk = vk_manager.create_virtual_keyboard(&seat, &event_queue.handle(), udata);
 
         // Create VKServiceArc with default values
         let vk_service = VKServiceArc {
@@ -117,7 +119,7 @@ impl VKServiceArc {
         let time = self.get_duration();
         #[cfg(feature = "debug")]
         info!("time: {}, keycode: {}", time, keycode);
-        if self.vk.as_ref().is_alive() {
+        if self.vk.is_alive() {
             self.vk.key(time, keycode, desired_key_state as u32);
             self.send_event();
             Ok(())
