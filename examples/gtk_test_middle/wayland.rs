@@ -34,7 +34,7 @@ pub fn init_wayland() -> (EventQueue, WlSeat, Main<ZwpVirtualKeyboardManagerV1>)
     let display = Display::connect_to_env()
         .or_else(|_| Display::connect_to_name("wayland-0"))
         .unwrap();
-    let (event_queue, global_mgr) = get_wl_global_mgr(display.clone());
+    let (event_queue, global_mgr) = get_wl_global_mgr(display);
     let seat = global_mgr.instantiate_exact::<WlSeat>(7).unwrap();
     let seat: WlSeat = WlSeat::from(seat.as_ref().clone());
     let vk_mgr = global_mgr

@@ -12,16 +12,11 @@ use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_v1:
 
 use super::{KeyCode, KeyState, SubmitError};
 
+#[warn(clippy::pedantic)]
 /// Stores the state of the virtual keyboard
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 struct VKModifierState {
     // Removed
-}
-
-impl Default for VKModifierState {
-    fn default() -> Self {
-        Self {}
-    }
 }
 
 #[derive(Debug)]
@@ -48,7 +43,7 @@ impl VKServiceArc {
         let modifiers = VKModifierState::default();
 
         // Get ZwpInputMethodV2 from ZwpInputMethodManagerV2
-        let vk = vk_manager.create_virtual_keyboard(&seat);
+        let vk = vk_manager.create_virtual_keyboard(seat);
 
         // Create VKServiceArc with default values
         let vk_service = VKServiceArc {
@@ -60,12 +55,11 @@ impl VKServiceArc {
 
         vk_service.init_virtual_keyboard();
 
-        // Wrap VKServiceArc to allow mutability from multiple threads
-        let vk_service = Arc::new(Mutex::new(vk_service));
         #[cfg(feature = "debug")]
         info!("New VKService was created");
+        // Wrap VKServiceArc to allow mutability from multiple threads
         // Return the wrapped VKServiceArc
-        vk_service
+        Arc::new(Mutex::new(vk_service))
     }
 
     fn init_virtual_keyboard(&self) {
