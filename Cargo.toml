@@ -22,7 +22,7 @@ tempfile = "3.2"
 memmap2 = "0.5"
 
 [dev-dependencies]
-gtk = "0.15.5"
+gtk = "0.16.2"
 
 
 
