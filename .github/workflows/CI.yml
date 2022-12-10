@@ -1,0 +1,150 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - "1.63.0"
+    steps:
+      - uses: ./.github/actions/install_deps
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt
+      - uses: actions/checkout@v3
+      - run: cargo fmt --all -- --check
+
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - "1.63.0"
+    steps:
+      - uses: ./.github/actions/install_deps
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy
+      - uses: actions/checkout@v3
+      - run: cargo clippy --all-targets --all-features -- -D clippy::pedantic
+
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - "1.63.0"
+    steps:
+      - uses: ./.github/actions/install_deps
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: actions/checkout@v3
+      - run: cargo check --all
+  
+  compile_all_features:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - "1.63.0"
+    steps:
+      - uses: ./.github/actions/install_deps
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: actions/checkout@v3
+      - run: cargo check --all --all-features
+
+  examples:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - "1.63.0"
+    steps:
+      - uses: ./.github/actions/install_deps
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: actions/checkout@v3
+      - run: cargo check --all --examples
+
+  examples_all_features:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - "1.63.0"
+    steps:
+      - uses: ./.github/actions/install_deps
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: actions/checkout@v3
+      - run: cargo check --all --examples --all-features
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - "1.63.0"
+    steps:
+      - uses: ./.github/actions/install_deps
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Test
+        run: cargo test
+
+  test_all_features:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - "1.63.0"
+    steps:
+      - uses: ./.github/actions/install_deps
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Test
+        run: cargo test --all-features
