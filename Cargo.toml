@@ -11,7 +11,7 @@ categories = ["gui", "os::linux-apis"]
 edition = "2021"
 
 [dependencies]
-wayland-client = {version="0.29", features = ["use_system_lib"]}
+wayland-client = {version="0.30", features = ["use_system_lib"]}
 wayland-protocols = {version="0.29", features = ["client", "unstable_protocols"]}
 input-event-codes = "5.16.8"
 zwp-virtual-keyboard = "0.2.6"
